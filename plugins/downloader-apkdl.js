@@ -1,7 +1,7 @@
 
 import axios from "axios";
 
-const handler = async (m, { conn, args }) => {
+let handler = async (m, { conn, args }) => {
   try {
     // Validación de argumentos
     if (!args[0]) {
@@ -13,34 +13,19 @@ const handler = async (m, { conn, args }) => {
     const appName = args.join(" "); // Unir argumentos en caso de múltiples palabras
     m.reply(`🔄 Buscando el APK de *${appName}*, por favor espera...`);
 
-    // URLs de las APIs
-    const apiUrls = [
-      `https://api.dorratz.com/v2/apk-dl?text=${encodeURIComponent(appName)}`,
-      `https://delirius-apiofc.vercel.app/download/apk?query=${encodeURIComponent(appName)}`
-    ];
+    // URL de la API de Dorratz
+    const apiUrl = `https://api.dorratz.com/v2/apk-dl?text=${encodeURIComponent(appName)}`;
 
-    let apkData = null;
+    // Realizar la solicitud a la API
+    const response = await axios.get(apiUrl);
 
-    // Iterar sobre cada API hasta encontrar un resultado válido
-    for (const apiUrl of apiUrls) {
-      try {
-        const response = await axios.get(apiUrl);
-        if (response.status === 200 && response.data.status) {
-          apkData = response.data.data;
-          break; // Detener la búsqueda si se encuentra una respuesta válida
-        }
-      } catch (error) {
-        console.error(`Error al consultar ${apiUrl}:`, error.message);
-      }
+    if (!response.data || !response.data.status) {
+      return m.reply(`❌ No se encontró la aplicación *${appName}*. Intenta con otro nombre.`);
     }
 
-    if (!apkData) {
-      return m.reply(
-        `❌ No se encontró la aplicación *${appName}*. Intenta con otro nombre.`
-      );
-    }
+    const apkData = response.data.data;
 
-    // Confirmar detalles de la aplicación
+    // Descripción de la aplicación
     let description = `🌐 *Información del APK*:\n`;
     description += `📌 *Nombre:* ${apkData.name}\n`;
     description += `🏢 *Desarrollador:* ${apkData.developer || "No especificado"}\n`;
@@ -74,9 +59,7 @@ const handler = async (m, { conn, args }) => {
     global.apkSession = { apkData };
   } catch (error) {
     console.error("❌ Error general:", error);
-    return m.reply(
-      "❌ Hubo un error al buscar el APK. Por favor, intenta nuevamente."
-    );
+    return m.reply("❌ Hubo un error al buscar el APK. Por favor, intenta nuevamente.");
   }
 };
 
@@ -84,9 +67,7 @@ const handler = async (m, { conn, args }) => {
 const handlerDownload = async (m, { conn }) => {
   try {
     if (!global.apkSession || !global.apkSession.apkData) {
-      return m.reply(
-        `❗ No hay sesión activa. Primero busca una aplicación con el comando .apk <nombre>.`
-      );
+      return m.reply(`❗ No hay sesión activa. Primero busca una aplicación con el comando .apk <nombre>.`);
     }
 
     const { apkData } = global.apkSession;
@@ -111,6 +92,6 @@ const handlerDownload = async (m, { conn }) => {
 
 // Registro de comandos
 handler.command = ["apk"];
-handlerDownload.command = ["apkdl"];
+handlerDownload.command = ["apk"];
 
 export default [handler, handlerDownload];
