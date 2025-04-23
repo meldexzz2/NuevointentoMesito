@@ -6,7 +6,7 @@ let b
 do b = ps.getRandom()
 while (b === a)
 m.reply(`*${toM(a)},* _Busca la salita bebe que ya viene el vs_ 📌
-BOTBARBOZA-AI 🤖`, null, {
+𝙈𝙚𝙨𝙞𝙩𝙤𝘽𝙤𝙩.🦥 🤖`, null, {
 mentions: [a, b]
 })}
 handler.help = ['donarsala']
