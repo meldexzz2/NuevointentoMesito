@@ -1,11 +1,13 @@
 
 import axios from "axios";
 
-let handler = async (m, { conn, args }) => {
+const handler = async (m, { conn, args }) => {
   try {
     // Validación de argumentos
     if (!args[0]) {
-      return m.reply("❌ Por favor, proporciona el nombre de la aplicación que deseas descargar.\nEjemplo: .apk Whatsapp");
+      return m.reply(
+        "❌ Por favor, proporciona el nombre de la aplicación que deseas descargar.\nEjemplo: .apk Whatsapp"
+      );
     }
 
     const appName = args.join(" "); // Unir argumentos en caso de múltiples palabras
@@ -33,7 +35,9 @@ let handler = async (m, { conn, args }) => {
     }
 
     if (!apkData) {
-      return m.reply(`❌ No se encontró la aplicación *${appName}*. Intenta con otro nombre.`);
+      return m.reply(
+        `❌ No se encontró la aplicación *${appName}*. Intenta con otro nombre.`
+      );
     }
 
     // Confirmar detalles de la aplicación
@@ -49,7 +53,7 @@ let handler = async (m, { conn, args }) => {
     // Botón de descarga
     const buttons = [
       {
-        buttonId: `${conn.usedPrefix}apk_download`,
+        buttonId: `${conn.usedPrefix}apkdl`,
         buttonText: { displayText: "📥 Descargar APK" },
         type: 1,
       },
@@ -68,10 +72,11 @@ let handler = async (m, { conn, args }) => {
 
     // Guardar sesión de búsqueda
     global.apkSession = { apkData };
-
   } catch (error) {
-    console.error(error);
-    return m.reply("❌ Hubo un error al buscar el APK. Por favor, intenta nuevamente.");
+    console.error("❌ Error general:", error);
+    return m.reply(
+      "❌ Hubo un error al buscar el APK. Por favor, intenta nuevamente."
+    );
   }
 };
 
@@ -79,7 +84,9 @@ let handler = async (m, { conn, args }) => {
 const handlerDownload = async (m, { conn }) => {
   try {
     if (!global.apkSession || !global.apkSession.apkData) {
-      return m.reply(`❗ No hay sesión activa. Primero busca una aplicación con el comando .apk <nombre>.`);
+      return m.reply(
+        `❗ No hay sesión activa. Primero busca una aplicación con el comando .apk <nombre>.`
+      );
     }
 
     const { apkData } = global.apkSession;
@@ -96,9 +103,8 @@ const handlerDownload = async (m, { conn }) => {
     );
 
     global.apkSession = null; // Limpiar la sesión después de la descarga
-
   } catch (error) {
-    console.error(error);
+    console.error("❌ Error al descargar el APK:", error);
     m.reply("❌ Hubo un error al descargar el APK.");
   }
 };
