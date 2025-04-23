@@ -105,6 +105,6 @@ const handlerDownload = async (m, { conn }) => {
 
 // Registro de comandos
 handler.command = ["apk"];
-handlerDownload.command = ["apk_download"];
+handlerDownload.command = ["apkdl"];
 
 export default [handler, handlerDownload];
