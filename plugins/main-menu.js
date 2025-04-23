@@ -48,10 +48,10 @@ let tags = {
 const defaultMenu = {
   before:  `*─ׄ─ׅ─⭒─ׄ─ׄ─⭒─ׅ─ׄ─⭒─ׄ─ׄ─⭒─ׄ─ׄ─*
 
-Hola *%name* soy *Barboza*
+Hola *%name* soy 𝙈𝙚𝙨𝙞𝙩𝙤𝘽𝙤𝙩.🦥
 
 ╔══════ •『 𝑪𝑹𝑬𝑨𝑫𝑶𝑹 』
-║  🖥️ Barboza
+║  🖥️ 𝙈𝙚𝙨𝙞𝙩𝙤
 ╚═════ ♢.✰.♢ ══════
 ╔══════ •『 𝑰𝑵𝑭𝑶-𝑩𝑶𝑻 』
 ║  👤 Cliente: %name
@@ -60,7 +60,7 @@ Hola *%name* soy *Barboza*
 ╚═════ ♢.✰.♢ ═══════
 
 ╔══════ •『 𝑰𝑵𝑭𝑶-𝑼𝑺𝑬𝑹』
-║  🤖 Bot: ©Bot-Barboza-Ai®
+║  🤖 Bot: 𝙈𝙚𝙨𝙞𝙩𝙤𝘽𝙤𝙩.🦥
 ║  💎 Modo Público
 ║  💨 Baileys: Multi Device
 ║  🪄 Tiempo Activo: %muptime
@@ -196,7 +196,7 @@ let handler = async (m, { conn, usedPrefix: _p, __dirname }) => {
     let pp13 = 'https://i.ibb.co/Cs6Tt9V/Sylph.jpg'
     let pp14 = 'https://i.ibb.co/JmcS3kv/Sylph.jpg'
     let pp15 = 'https://i.ibb.co/Cs6Tt9V/Sylph.jpg'
-    let img = 'https://qu.ax/Mvhfa.jpg'
+    let img = 'https://i.postimg.cc/Vv73j0HY/IMG-6032.jpg'
     let img2 = 'https://d.uguu.se/iqqLBUfF.jpg'
     await m.react('⭐')
    // await conn.sendMessage(m.chat, { video: { url: [pp, pp2, pp3, pp4, pp5, pp6, pp7, pp8, pp9, pp10, pp11, pp12, pp13, pp14, pp15].getRandom() }, gifPlayback: true, caption: text.trim(), mentions: [m.sender] }, { quoted: estilo })
