@@ -1,257 +1,666 @@
-import { promises } from 'fs'
-import { join } from 'path'
-import fetch from 'node-fetch'
-import { xpRange } from '../lib/levelling.js'
-let Styles = (text, style = 1) => {
-  var xStr = 'abcdefghijklmnopqrstuvwxyz1234567890'.split('');
-  var yStr = Object.freeze({
-    1: 'ᴀʙᴄᴅᴇꜰɢʜɪᴊᴋʟᴍɴᴏᴘqʀꜱᴛᴜᴠᴡxʏᴢ1234567890'
-  });
-  var replacer = [];
-  xStr.map((v, i) => replacer.push({
-    original: v,
-    convert: yStr[style].split('')[i]
-  }));
-  var str = text.toLowerCase().split('');
-  var output = [];
-  str.map(v => {
-    const find = replacer.find(x => x.original == v);
-    find ? output.push(find.convert) : output.push(v);
-  });
-  return output.join('');
-};
-let tags = {
-  'anime': '🧧 _ANIME_ 🎐',
-  'main': '❗ _INFO_ ❕',
-  'search': '🔎 _SEARCH_ 🔍',
-  'game': '🕹️ GAME 🎮',
-  'serbot': '⚙️ _SUB BOTS_ 🤖',
-  'rpg': '🌐 _RPG_ 🥇',
-  'rg': '🎑 _REGISTRO_ 🎟️',
-  'sticker': '💟 2STICKER_ 🏷️',
-  'img': '🖼️ _IMAGE_ 🎇',
-  'group': '👥 _GROUPS_ 📢',
-//  'logo': '_MAKER_',
-  'nable': '🎛️ _ON / OFF_ 🔌', 
-  'premium': '💎 _PREMIUM_ 👑',
-  'downloader': '📥 _DOWNLOAD_ 📤',
-  'tools': '🔧 _TOOLS_ 🛠️',
-  'fun': '🎉 _FUN_ 🎊',
-  'nsfw': '🔞 _NSFW_ 📛', 
-  'cmd': '🧮 _DATABASE_ 🖥️',
-  'owner': '👤 _OWNER_ 👁️', 
-  'audio': '📣 _AUDIOS_ 🔊', 
-  'advanced': '🗝️ _ADVANCED_ 📍',
-  'frefire':  '🎮_frefire_ 🎮',
-}
 
-const defaultMenu = {
-  before:  `*─ׄ─ׅ─⭒─ׄ─ׄ─⭒─ׅ─ׄ─⭒─ׄ─ׄ─⭒─ׄ─ׄ─*
+let handler = async (m, { conn }) => {
+    let img = 'https://qu.ax/JhPdx.jpg';
 
-Hola *%name* soy 𝙈𝙚𝙨𝙞𝙩𝙤𝘽𝙤𝙩.🦥
+    
+    let name = await conn.getName(m.sender);
 
-╔══════ •『 𝑪𝑹𝑬𝑨𝑫𝑶𝑹 』
-║  🖥️ 𝙈𝙚𝙨𝙞𝙩𝙤
+    let texto = `╔══════ •『 𝑪𝑹𝑬𝑨𝑫𝑶𝑹 』
+║  🖥️ Mesito
 ╚═════ ♢.✰.♢ ══════
-╔══════ •『 𝑰𝑵𝑭𝑶-𝑩𝑶𝑻 』
-║  👤 Cliente: %name
-║  ⭐ Exp: %exp
-║  ⚡ Nivel: %level
-╚═════ ♢.✰.♢ ═══════
 
-╔══════ •『 𝑰𝑵𝑭𝑶-𝑼𝑺𝑬𝑹』
-║  🤖 Bot: 𝙈𝙚𝙨𝙞𝙩𝙤𝘽𝙤𝙩.🦥
-║  💎 Modo Público
-║  💨 Baileys: Multi Device
-║  🪄 Tiempo Activo: %muptime
-║  🎩 Usuarios: %totalreg 
-╚═════ ♢.✰.♢ ════════
+ ‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎
+			⚙️_*𝐋𝐈𝐒𝐓𝐀 𝐃𝐄 𝐂𝐎𝐌𝐀𝐍𝐃𝐎𝐒*_ 🚀
+╯*
+*╭╍╍╍╍❖【 *❗ _INFO_ ❕* 】
+┋💎›【 .precios1
+┋💎›【 .precios2
+┋💎›【 .staff
+┋💎›【 .botreglas
+┋💎›【 .owner
+┋💎›【 .grupos
+┋💎›【 .allmenu
+┋💎›【 .menu2
+┋💎›【 .menu3
+┋💎›【 .runtime
+┋💎›【 .totalfunciones
+┋💎›【 .menuff
+*╰╍╍╍╍❖•ೋ° °ೋ•❖╍╍╍╍╯*
+*╭╍╍╍╍❖【 *🔎 _SEARCH_ 🔍* 】
+┋💎›【 .pinscroll <búsqueda>
+┋💎›【 .pinseguir
+┋💎›【 .pinatras
+┋💎›【 .ytsearch *<texto>*
+┋💎›【 .yts *<texto>*
+┋💎›【 .tksearch <búsqueda>
+┋💎›【 .tkseguir
+┋💎›【 .pelisplus *<título>*
+┋💎›【 .neko
+┋💎›【 .waifu
+┋💎›【 .biblia *<referencia>*
+┋💎›【 .biblia *<referencia>*
+*╰╍╍╍╍❖•ೋ° °ೋ•❖╍╍╍╍╯*
+*╭╍╍╍╍❖【 *🕹️ GAME 🎮* 】
+┋💎›【 .trivia
+┋💎›【 .capitalde
+┋💎›【 .pelear
+┋💎›【 .adivinabandera
+┋💎›【 .ahorcado
+┋💎›【 .game
+┋💎›【 .slot <apuesta>
+┋💎›【 .sopa
+┋💎›【 .buscarpalabras
+┋💎›【 .apostar *<cantidad>*
+*╰╍╍╍╍❖•ೋ° °ೋ•❖╍╍╍╍╯*
+*╭╍╍╍╍❖【 *⚙️ _SUB BOTS_ 🤖* 】
 
-*─ׄ─ׄ─⭒─ׄ─ׅ─ׄ⭒─ׄ─ׄ─⭒─ׄ─ׄ─⭒─ׄ─ׅ─*
- %readmore
-\t\t\t⚙️_*𝐋𝐈𝐒𝐓𝐀 𝐃𝐄 𝐂𝐎𝐌𝐀𝐍𝐃𝐎𝐒*_ 🚀
-`.trimStart(),
-  header: '*╭╍╍╍╍❖【 *%category* 】',
-  body: '┋💎›【 %cmd %islimit %isPremium\n',
-  footer: '*╰╍╍╍╍❖•ೋ° °ೋ•❖╍╍╍╍╯*',
-  after: `© ${textbot}`,
+*╰╍╍╍╍❖•ೋ° °ೋ•❖╍╍╍╍╯*
+*╭╍╍╍╍❖【 *🌐 _RPG_ 🥇* 】
+┋💎›【 .abrircofre
+┋💎›【 .resemanal
+┋💎›【 .buy <cantidad>
+┋💎›【 .work
+┋💎›【 .darxp *@user <cantidad>*
+┋💎›【 .verxp
+┋💎›【 .lb
+┋💎›【 .annual
+┋💎›【 .yearly
+┋💎›【 .aventura
+┋💎›【 .adventure
+┋💎›【 .batalla @usuario
+┋💎›【 .berburu
+┋💎›【 .chetarki
+┋💎›【 .chetarki
+┋💎›【 .claim2
+┋💎›【 .claim3
+┋💎›【 .crimen
+┋💎›【 .dardulces *@user <cantidad>*
+┋💎›【 .regalarxp *@user <cantidad>*
+┋💎›【 .claim
+┋💎›【 .dulces
+┋💎›【 .explorar
+┋💎›【 .halloween
+┋💎›【 .heal
+┋💎›【 .inventario
+┋💎›【 .inv
+┋💎›【 .ki
+┋💎›【 .levelup
+┋💎›【 .masc
+┋💎›【 .monthly
+┋💎›【 .minar
+┋💎›【 .quitarxp *@user <cantidad>*
+┋💎›【 .retirar
+┋💎›【 .weekly
+*╰╍╍╍╍❖•ೋ° °ೋ•❖╍╍╍╍╯*
+*╭╍╍╍╍❖【 *🎑 _REGISTRO_ 🎟️* 】
+┋💎›【 .profile [@user]
+┋💎›【 .profile [@user]
+┋💎›【 .setbirth <establece tu cumpleaños>
+┋💎›【 .setdescription <establece tu descripción>
+┋💎›【 .setgenre <establece tu genero>
+┋💎›【 .profile
+┋💎›【 .reg
+┋💎›【 .unreg
+┋💎›【 .confesar <número mensaje>
+┋💎›【 .respuesta <id mensaje>
+*╰╍╍╍╍❖•ೋ° °ೋ•❖╍╍╍╍╯*
+*╭╍╍╍╍❖【 *💟 2STICKER_ 🏷️* 】
+┋💎›【 .brat *<texto>*
+┋💎›【 .pfp @user
+┋💎›【 .quotly *<texto>*
+┋💎›【 .scat
+┋💎›【 .stiker <img>
+┋💎›【 .sticker <url>
+┋💎›【 .wm *<nombre>|<autor>*
+┋💎›【 .emojimix *<emoji+emoji>*
+*╰╍╍╍╍❖•ೋ° °ೋ•❖╍╍╍╍╯*
+*╭╍╍╍╍❖【 *🖼️ _IMAGE_ 🎇* 】
+┋💎›【 .pinterest <término>
+*╰╍╍╍╍❖•ೋ° °ೋ•❖╍╍╍╍╯*
+*╭╍╍╍╍❖【 *👥 _GROUPS_ 📢* 】
+┋💎›【 .mute
+┋💎›【 .unmute
+┋💎›【 .grouptime *<open/close>* *<número>*
+┋💎›【 .add *<número>*
+┋💎›【 .banearbot
+┋💎›【 .chetaruser
+┋💎›【 .delete
+┋💎›【 .demote *@tag*
+┋💎›【 .fantasmas
+┋💎›【 .infogp
+┋💎›【 .hidetag
+┋💎›【 .encuesta *<pregunta|opciones>*
+┋💎›【 .promote *593xxx*
+┋💎›【 .promote *@usuario*
+┋💎›【 .promote *responder chat*
+┋💎›【 .resetlink
+┋💎›【 .setbye @user + texto
+┋💎›【 .setwelcome @user + texto
+┋💎›【 .sorteo
+┋💎›【 .todos
+┋💎›【 .desbanearbot
+┋💎›【 .kick *@user*
+┋💎›【 .emotag < emoji >
+*╰╍╍╍╍❖•ೋ° °ೋ•❖╍╍╍╍╯*
+*╭╍╍╍╍❖【 *🎛️ _ON / OFF_ 🔌* 】
+┋💎›【 .enable
+┋💎›【 .disable
+┋💎›【 .on
+┋💎›【 .off
+*╰╍╍╍╍❖•ೋ° °ೋ•❖╍╍╍╍╯*
+*╭╍╍╍╍❖【 *💎 _PREMIUM_ 👑* 】
+┋💎›【 .xnxxsearch <query>
+*╰╍╍╍╍❖•ೋ° °ೋ•❖╍╍╍╍╯*
+*╭╍╍╍╍❖【 *📥 _DOWNLOAD_ 📤* 】
+┋💎›【 .audio
+┋💎›【 .animedl <anime-id> <episode-number>
+┋💎›【 .capcutdownload *<url cc>*
+┋💎›【 .tiktokuser *<usuario>*
+┋💎›【 .spotify
+┋💎›【 .music
+┋💎›【 .fb *<link>*
+┋💎›【 .playaudio <texto>
+┋💎›【 .mp3
+┋💎›【 .spotify
+┋💎›【 .music
+┋💎›【 .xnxxsearch <query>
+*╰╍╍╍╍❖•ೋ° °ೋ•❖╍╍╍╍╯*
+*╭╍╍╍╍❖【 *🔧 _TOOLS_ 🛠️* 】
+┋💎›【 .pinscroll <búsqueda>
+┋💎›【 .pinseguir
+┋💎›【 .pinatras
+┋💎›【 .flux *<texto>*
+┋💎›【 .tourl2
+┋💎›【 .tourl
+┋💎›【 .rev
+┋💎›【 .dalle
+┋💎›【 .nuevafotochannel
+┋💎›【 .nosilenciarcanal
+┋💎›【 .silenciarcanal
+┋💎›【 .noseguircanal
+┋💎›【 .seguircanal
+┋💎›【 .avisoschannel
+┋💎›【 .resiviravisos
+┋💎›【 .inspect
+┋💎›【 .inspeccionar
+┋💎›【 .eliminarfotochannel
+┋💎›【 .reactioneschannel
+┋💎›【 .reaccioneschannel
+┋💎›【 .nuevonombrecanal
+┋💎›【 .nuevadescchannel
+┋💎›【 .setmoneda
+┋💎›【 .reenviar
+┋💎›【 .demo
+┋💎›【 .fake *<texto/@tag/texto>*
+┋💎›【 .hd
+┋💎›【 .removebg
+┋💎›【 .tourl2
+┋💎›【 .tourl
+┋💎›【 .tts <lang> <teks>
+┋💎›【 .tomp3
+*╰╍╍╍╍❖•ೋ° °ೋ•❖╍╍╍╍╯*
+*╭╍╍╍╍❖【 *🎉 _FUN_ 🎊* 】
+┋💎›【 .love
+┋💎›【 .coffe/cafe @tag
+┋💎›【 .dado
+┋💎›【 .formarnv
+┋💎›【 .acariciar @tag
+┋💎›【 .amistad
+┋💎›【 .gay2 *@user*
+┋💎›【 .lesbiana *@user*
+┋💎›【 .pajero *@user*
+┋💎›【 .pajera *@user*
+┋💎›【 .puto *@user*
+┋💎›【 .puta *@user*
+┋💎›【 .manco *@user*
+┋💎›【 .manca *@user*
+┋💎›【 .rata *@user*
+┋💎›【 .prostituta *@user*
+┋💎›【 .prostituto *@user*
+┋💎›【 .consejo
+┋💎›【 .doxear <nombre> | <@tag>
+┋💎›【 .facto
+┋💎›【 .follar
+┋💎›【 .formarpareja
+┋💎›【 .formarpareja5
+┋💎›【 .formartrio
+┋💎›【 .oracion
+┋💎›【 .gay
+┋💎›【 .huevo @user
+┋💎›【 .insulto
+┋💎›【 .kchero
+┋💎›【 .besar @tag
+┋💎›【 .love *@user*
+┋💎›【 .madrid
+┋💎›【 .marry *@usuario*
+┋💎›【 .divorce
+┋💎›【 .morse *<encode|decode>*
+┋💎›【 .pajeame
+┋💎›【 .perra
+┋💎›【 .personalidad *<nombre>*
+┋💎›【 .piropo
+┋💎›【 .pregunta *<texto>*
+┋💎›【 .acosar @usuario
+┋💎›【 .abrazar @usuario
+┋💎›【 .llorar @usuario
+┋💎›【 .abrazar @usuario
+┋💎›【 .awoo @usuario
+┋💎›【 .besar @usuario
+┋💎›【 .lamer @usuario
+┋💎›【 .acariciar @usuario
+┋💎›【 .engreído @usuario
+┋💎›【 .golpear @usuario
+┋💎›【 .lanzar @usuario
+┋💎›【 .ruborizarse @usuario
+┋💎›【 .sonreír @usuario
+┋💎›【 .saludar @usuario
+┋💎›【 .chocar @usuario
+┋💎›【 .sostener @usuario
+┋💎›【 .morder @usuario
+┋💎›【 .glomp @usuario
+┋💎›【 .abofetear @usuario
+┋💎›【 .matar @usuario
+┋💎›【 .feliz @usuario
+┋💎›【 .guiñar @usuario
+┋💎›【 .tocar @usuario
+┋💎›【 .bailar @usuario
+┋💎›【 .cringe @usuario
+┋💎›【 .reto
+┋💎›【 .sapa
+┋💎›【 .sapo
+┋💎›【 .sorteo
+┋💎›【 .top
+┋💎›【 .verdad
+┋💎›【 .tijeras @tag
+┋💎›【 .zorra
+┋💎›【 .acertijo
+┋💎›【 .ruleta *<cantidad> <color>*
+┋💎›【 .┋💎›【 .buycoins
+┋💎›【 .buyall
+┋💎›【 .letra *<texto>*
+*╰╍╍╍╍❖•ೋ° °ೋ•❖╍╍╍╍╯*
+*╭╍╍╍╍❖【 *🔞 _NSFW_ 📛* 】
+┋💎›【 .pechos
+┋💎›【 .tetas
+┋💎›【 .genshin
+┋💎›【 .swimsuit
+┋💎›【 .schoolswimsuit
+┋💎›【 .white
+┋💎›【 .barefoot
+┋💎›【 .touhou
+┋💎›【 .gamecg
+┋💎›【 .hololive
+┋💎›【 .uncensored
+┋💎›【 .sunglasses
+┋💎›【 .glasses
+┋💎›【 .weapon
+┋💎›【 .shirtlift
+┋💎›【 .chain
+┋💎›【 .fingering
+┋💎›【 .flatchest
+┋💎›【 .torncloth
+┋💎›【 .bondage
+┋💎›【 .demon
+┋💎›【 .wet
+┋💎›【 .pantypull
+┋💎›【 .headdress
+┋💎›【 .headphone
+┋💎›【 .tie
+┋💎›【 .anusview
+┋💎›【 .shorts
+┋💎›【 .stokings
+┋💎›【 .topless
+┋💎›【 .beach
+┋💎›【 .bunnygirl
+┋💎›【 .bunnyear
+┋💎›【 .idol
+┋💎›【 .vampire
+┋💎›【 .gun
+┋💎›【 .maid
+┋💎›【 .bra
+┋💎›【 .nobra
+┋💎›【 .bikini
+┋💎›【 .whitehair
+┋💎›【 .blonde
+┋💎›【 .pinkhair
+┋💎›【 .bed
+┋💎›【 .ponytail
+┋💎›【 .nude
+┋💎›【 .dress
+┋💎›【 .underwear
+┋💎›【 .foxgirl
+┋💎›【 .uniform
+┋💎›【 .skirt
+┋💎›【 .sex
+┋💎›【 .sex2
+┋💎›【 .sex3
+┋💎›【 .breast
+┋💎›【 .twintail
+┋💎›【 .spreadpussy
+┋💎›【 .tears
+┋💎›【 .seethrough
+┋💎›【 .breasthold
+┋💎›【 .drunk
+┋💎›【 .fateseries
+┋💎›【 .spreadlegs
+┋💎›【 .openshirt
+┋💎›【 .headband
+┋💎›【 .food
+┋💎›【 .close
+┋💎›【 .tree
+┋💎›【 .nipples
+┋💎›【 .erectnipples
+┋💎›【 .horns
+┋💎›【 .greenhair
+┋💎›【 .wolfgirl
+┋💎›【 .catgirl
+┋💎›【 .r34 <texto>
+┋💎›【 .pack
+┋💎›【 .pack2
+┋💎›【 .pack3
+┋💎›【 .videoxxx
+┋💎›【 .vídeoxxx
+┋💎›【 .videoxxxlesbi
+┋💎›【 .videolesbixxx
+┋💎›【 .pornolesbivid
+┋💎›【 .pornolesbianavid
+┋💎›【 .pornolesbiv
+┋💎›【 .pornolesbianav
+┋💎›【 .pornolesv
+┋💎›【 .pack
+┋💎›【 .pack2
+┋💎›【 .pack3
+┋💎›【 .videoxxx
+┋💎›【 .vídeoxxx
+┋💎›【 .videoxxxlesbi
+┋💎›【 .videolesbixxx
+┋💎›【 .pornolesbivid
+┋💎›【 .pornolesbianavid
+┋💎›【 .pornolesbiv
+┋💎›【 .pornolesbianav
+┋💎›【 .pornolesv
+┋💎›【 .pack
+┋💎›【 .pack2
+┋💎›【 .pack3
+┋💎›【 .videoxxx
+┋💎›【 .vídeoxxx
+┋💎›【 .videoxxxlesbi
+┋💎›【 .videolesbixxx
+┋💎›【 .pornolesbivid
+┋💎›【 .pornolesbianavid
+┋💎›【 .pornolesbiv
+┋💎›【 .pornolesbianav
+┋💎›【 .pornolesv
+*╰╍╍╍╍❖•ೋ° °ೋ•❖╍╍╍╍╯*
+*╭╍╍╍╍❖【 *🧮 _DATABASE_ 🖥️* 】
+*╰╍╍╍╍❖•ೋ° °ೋ•❖╍╍╍╍╯*
+*╭╍╍╍╍❖【 *👤 _OWNER_ 👁️* 】
+┋
+*╰╍╍╍╍❖•ೋ° °ೋ•❖╍╍╍╍╯*
+*╭╍╍╍╍❖【 *📣 _AUDIOS_ 🔊* 】
+┋💎›【 .bass *<mp3/vn>*
+┋💎›【 .blown *<mp3/vn>*
+┋💎›【 .deep *<mp3/vn>*
+┋💎›【 .earrape *<mp3/vn>*
+┋💎›【 .fast *<mp3/vn>*
+┋💎›【 .fat *<mp3/vn>*
+┋💎›【 .nightcore *<mp3/vn>*
+┋💎›【 .reverse *<mp3/vn>*
+┋💎›【 .robot *<mp3/vn>*
+┋💎›【 .slow *<mp3/vn>*
+┋💎›【 .smooth *<mp3/vn>*
+┋💎›【 .tupai *<mp3/vn>*
+┋💎›【 .reverb *<mp3/vn>*
+┋💎›【 .chorus *<mp3/vn>*
+┋💎›【 .flanger *<mp3/vn>*
+┋💎›【 .distortion *<mp3/vn>*
+┋💎›【 .pitch *<mp3/vn>*
+┋💎›【 .highpass *<mp3/vn>*
+┋💎›【 .lowpass *<mp3/vn>*
+┋💎›【 .underwater *<mp3/vn>*
+*╰╍╍╍╍❖•ೋ° °ೋ•❖╍╍╍╍╯*
+*╭╍╍╍╍❖【 *🗝️ _ADVANCED_ 📍* 】
+*╰╍╍╍╍❖•ೋ° °ೋ•❖╍╍╍╍╯*
+*╭╍╍╍╍❖【 *🎮_frefire_ 🎮* 】
+*╰╍╍╍╍❖•ೋ° °ೋ•❖╍╍╍╍╯*
+*╭╍╍╍╍❖【 *descargas* 】
+┋💎›【 .yta
+┋💎›【 .ytmp3
+┋💎›【 .play2
+┋💎›【 .ytv
+┋💎›【 .ytmp4
+┋💎›【 .tiktok2 *<link>*
+┋💎›【 .yta
+┋💎›【 .ytmp3
+┋💎›【 .play2
+┋💎›【 .ytv
+┋💎›【 .ytmp4
+┋💎›【 .mega
+┋💎›【 .ttmp3 ◜⭐◞
+┋💎›【 .tiktokmp3 ◜⭐◞
+┋💎›【 .apk2
+┋💎›【 .mediafire
+*╰╍╍╍╍❖•ೋ° °ೋ•❖╍╍╍╍╯*
+*╭╍╍╍╍❖【 *maker* 】
+┋💎›【 .gay
+*╰╍╍╍╍❖•ೋ° °ೋ•❖╍╍╍╍╯*
+*╭╍╍╍╍❖【 *juegos* 】
+┋💎›【 .apostardulces <cantidad> @usuario
+┋💎›【 .topmascota
+*╰╍╍╍╍❖•ೋ° °ೋ•❖╍╍╍╍╯*
+*╭╍╍╍╍❖【 *random* 】
+┋💎›【 .tiktokvalle
+┋💎›【 .tiktokfrases
+┋💎›【 .tiktokhot
+┋💎›【 .tiktokmusic
+*╰╍╍╍╍❖•ೋ° °ೋ•❖╍╍╍╍╯*
+*╭╍╍╍╍❖【 *enlace2* 】
+┋💎›【 .link2
+*╰╍╍╍╍❖•ೋ° °ೋ•❖╍╍╍╍╯*
+*╭╍╍╍╍❖【 *econ* 】
+┋💎›【 .afk [alasan]
+┋💎›【 .rf
+┋💎›【 .rm
+*╰╍╍╍╍❖•ೋ° °ೋ•❖╍╍╍╍╯*
+*╭╍╍╍╍❖【 *buscadores* 】
+┋💎›【 .wikipedia <apa> ◜⭐◞
+┋💎›【 .google <pencarian>
+┋💎›【 .googlef <pencarian>
+*╰╍╍╍╍❖•ೋ° °ೋ•❖╍╍╍╍╯*
+*╭╍╍╍╍❖【 *buscador* 】
+┋💎›【 .mercadolibre <búsqueda>
+┋💎›【 .tweetposts
+*╰╍╍╍╍❖•ೋ° °ೋ•❖╍╍╍╍╯*
+*╭╍╍╍╍❖【 *transformador* 】
+┋💎›【 .ibb
+┋💎›【 .tourl2
+*╰╍╍╍╍❖•ೋ° °ೋ•❖╍╍╍╍╯*
+*╭╍╍╍╍❖【 *fix* 】
+┋💎›【 .dsowner
+┋💎›【 .dsowner
+*╰╍╍╍╍❖•ೋ° °ೋ•❖╍╍╍╍╯*
+*╭╍╍╍╍❖【 *internet* 】
+┋💎›【 .imagen *<texto>*
+┋💎›【 .imagen *<texto>*
+*╰╍╍╍╍❖•ೋ° °ೋ•❖╍╍╍╍╯*
+*╭╍╍╍╍❖【 *dl* 】
+┋💎›【 .imagen *<texto>*
+┋💎›【 .gitclone *<url git>*
+┋💎›【 .igstory
+┋💎›【 .likee *<url>*
+┋💎›【 .tiktok *<url>*
+┋💎›【 .tiktokhd *<url>*
+┋💎›【 .ig *<link>*
+┋💎›【 .ytmp4 *<link yt>*
+┋💎›【 .imagen *<texto>*
+*╰╍╍╍╍❖•ೋ° °ೋ•❖╍╍╍╍╯*
+*╭╍╍╍╍❖【 *tiktok* 】
+┋💎›【 .tksearch <búsqueda>
+┋💎›【 .tkseguir
+*╰╍╍╍╍❖•ೋ° °ೋ•❖╍╍╍╍╯*
+*╭╍╍╍╍❖【 *freefire* 】
+┋💎›【 .donarsala
+┋💎›【 .12vs12
+┋💎›【 .16vs16
+┋💎›【 .20vs20
+┋💎›【 .24vs24
+┋💎›【 .4vs4
+┋💎›【 .6vs6
+┋💎›【 .8vs8
+┋💎›【 .cuadrilatero
+┋💎›【 .guerra
+┋💎›【 .interna4
+┋💎›【 .reglaslideres
+┋💎›【 .reglaslideres2
+┋💎›【 .scrim
+┋💎›【 .purgatorio
+┋💎›【 .alpes
+┋💎›【 .bermuda
+┋💎›【 .menuff
+*╰╍╍╍╍❖•ೋ° °ೋ•❖╍╍╍╍╯*
+*╭╍╍╍╍❖【 *descarga* 】
+┋💎›【 .spotify ◜⭐◞
+*╰╍╍╍╍❖•ೋ° °ೋ•❖╍╍╍╍╯*
+*╭╍╍╍╍❖【 *economy* 】
+┋💎›【 .bal
+┋💎›【 .bank
+┋💎›【 .depositar
+┋💎›【 .prestar [cantidad] [@tag]
+┋💎›【 .pagar [cantidad] [@tag]
+┋💎›【 .deuda [cantidad] [@tag]
+┋💎›【 .rob2
+┋💎›【 .abrircasa
+*╰╍╍╍╍❖•ೋ° °ೋ•❖╍╍╍╍╯*
+*╭╍╍╍╍❖【 *economía* 】
+┋💎›【 .dulcesdiario
+┋💎›【 .canjearcaramelos <cantidad>
+┋💎›【 .ganarmonedas
+┋💎›【 .quitarmonedas <cantidad>
+*╰╍╍╍╍❖•ೋ° °ೋ•❖╍╍╍╍╯*
+*╭╍╍╍╍❖【 *emox* 】
+┋💎›【 .sleep/dormir @tag
+┋💎›【 .bite/morder @tag
+┋💎›【 .blush/sonrojarse @tag
+┋💎›【 .bored/aburrido @tag
+┋💎›【 .grop/manosear @tag
+┋💎›【 .happy/feliz @tag
+┋💎›【 .hello/hola @tag
+┋💎›【 .kill/matar @tag
+┋💎›【 .sad/triste @tag
+┋💎›【 .smoke/fumar @tag
+*╰╍╍╍╍❖•ೋ° °ೋ•❖╍╍╍╍╯*
+*╭╍╍╍╍❖【 *nsfws* 】
+┋💎›【 .anal/culiar @tag
+┋💎›【 .cum/leche @tag
+┋💎›【 .penetrar @user
+┋💎›【 .lickpussy/coño @tag
+┋💎›【 .sexo/sex @tag
+┋💎›【 .violar/perra @tag
+*╰╍╍╍╍❖•ೋ° °ೋ•❖╍╍╍╍╯*
+*╭╍╍╍╍❖【 *diversión* 】
+┋💎›【 .adoptada @usuario
+┋💎›【 .adoptado @usuario
+┋💎›【 .gordopantene @usuario
+┋💎›【 .gordoteton @usuario
+┋💎›【 .meme
+┋💎›【 .negra @usuario
+┋💎›【 .peruana @usuario
+┋💎›【 .peruano @usuario
+┋💎›【 .sinculo @usuario
+┋💎›【 .sinpito @usuario
+┋💎›【 .sintetas @usuario
+┋💎›【 .meme
+┋💎›【 .mp4meme
+*╰╍╍╍╍❖•ೋ° °ೋ•❖╍╍╍╍╯*
+*╭╍╍╍╍❖【 *diversion* 】
+┋💎›【 .asustar @usuario
+*╰╍╍╍╍❖•ೋ° °ೋ•❖╍╍╍╍╯*
+*╭╍╍╍╍❖【 *consultor* 】
+┋💎›【 .cpf *<numero>*
+*╰╍╍╍╍❖•ೋ° °ೋ•❖╍╍╍╍╯*
+*╭╍╍╍╍❖【 *games* 】
+┋💎›【 .deathnote
+*╰╍╍╍╍❖•ೋ° °ೋ•❖╍╍╍╍╯*
+*╭╍╍╍╍❖【 *info* 】
+┋💎›【 .cuartoschampions
+┋💎›【 .sugerir
+┋💎›【 .status
+┋💎›【 .horario
+┋💎›【 .newcommand
+┋💎›【 .ping
+┋💎›【 .sistema
+┋💎›【 .sugerir
+┋💎›【 .reportar
+*╰╍╍╍╍❖•ೋ° °ೋ•❖╍╍╍╍╯*
+*╭╍╍╍╍❖【 *arte* 】
+┋💎›【 .poesía
+*╰╍╍╍╍❖•ೋ° °ೋ•❖╍╍╍╍╯*
+*╭╍╍╍╍❖【 *cocina* 】
+┋💎›【 .recetas
+*╰╍╍╍╍❖•ೋ° °ೋ•❖╍╍╍╍╯*
+*╭╍╍╍╍❖【 *gacha* 】
+┋💎›【 .givechar <nombre del personaje> @usuario
+┋💎›【 .givewaifu <nombre del personaje> @usuario
+┋💎›【 .regalar <nombre del personaje> @usuario
+*╰╍╍╍╍❖•ೋ° °ೋ•❖╍╍╍╍╯*
+*╭╍╍╍╍❖【 *ai* 】
+┋💎›【 .chatgpt <texto>
+┋💎›【 .ia <texto>
+*╰╍╍╍╍❖•ೋ° °ೋ•❖╍╍╍╍╯*
+*╭╍╍╍╍❖【 *grupo* 】
+┋💎›【 .group abrir / cerrar
+┋💎›【 .groupdesc <text>
+┋💎›【 .link
+┋💎›【 .setname <text>
+┋💎›【 admins <texto>
+┋💎›【 .delete
+┋💎›【 .invite *<numero>*
+┋💎›【 .listonline
+*╰╍╍╍╍❖•ೋ° °ೋ•❖╍╍╍╍╯*
+*╭╍╍╍╍❖【 *staff* 】
+┋💎›【 .noaceptar
+┋💎›【 .noaceptar
+*╰╍╍╍╍❖•ೋ° °ೋ•❖╍╍╍╍╯*
+*╭╍╍╍╍❖【 *jadibot* 】
+┋💎›【 .code
+*╰╍╍╍╍❖•ೋ° °ೋ•❖╍╍╍╍╯*
+*╭╍╍╍╍❖【 *logo* 】
+┋💎›【 .menu3
+*╰╍╍╍╍❖•ೋ° °ೋ•❖╍╍╍╍╯*
+*╭╍╍╍╍❖【 *mascota* 】
+┋💎›【 .excavar
+*╰╍╍╍╍❖•ೋ° °ೋ•❖╍╍╍╍╯*
+*╭╍╍╍╍❖【 *mascotas* 】
+┋💎›【 .level
+┋💎›【 .viajar
+*╰╍╍╍╍❖•ೋ° °ೋ•❖╍╍╍╍╯*
+*╭╍╍╍╍❖【 *admin* 】
+┋💎›【 .quitardulces <cantidad> <@usuario>
+*╰╍╍╍╍❖•ೋ° °ೋ•❖╍╍╍╍╯*
+*╭╍╍╍╍❖【 *herramientas* 】
+┋💎›【 .clima *<ciudad/país>*
+*╰╍╍╍╍❖•ೋ° °ೋ•❖╍╍╍╍╯*
+ > 𝙏𝙚𝙖𝙢 𝘽𝙤𝙡𝙞𝙡𝙡𝙤 𝘽𝙤𝙩.🥖 
+`
+
+const fkontak = {
+        "key": {
+    "participants":"0@s.whatsapp.net",
+                "remoteJid": "status@broadcast",
+                "fromMe": false,
+                "id": "Halo"
+        },
+        "message": {
+                "contactMessage": {
+                        "vcard": `BEGIN:VCARD\nVERSION:3.0\nN:Sy;Bot;;;\nFN:y\nitem1.TEL;waid=${m.sender.split('@')[0]}:${m.sender.split('@')[0]}\nitem1.X-ABLabel:Ponsel\nEND:VCARD`
+                }
+        },
+        "participant": "0@s.whatsapp.net"
 }
-
-let handler = async (m, { conn, usedPrefix: _p, __dirname }) => {
-  try {
-     let tag = `@${m.sender.split("@")[0]}`
-    let mode = global.opts["self"] ? "Privado" : "Publico"
-    let _package = JSON.parse(await promises.readFile(join(__dirname, '../package.json')).catch(_ => ({}))) || {}
-    let { exp, limit, level } = global.db.data.users[m.sender]
-    let { min, xp, max } = xpRange(level, global.multiplier)
-    let name = await conn.getName(m.sender)
-    let d = new Date(new Date + 3600000)
-    let locale = 'es'
-    let weton = ['Pahing', 'Pon', 'Wage', 'Kliwon', 'Legi'][Math.floor(d / 84600000) % 5]
-    let week = d.toLocaleDateString(locale, { weekday: 'long' })
-    let date = d.toLocaleDateString(locale, {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric'
-    })
-    let dateIslamic = Intl.DateTimeFormat(locale + '-TN-u-ca-islamic', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric'
-    }).format(d)
-    let time = d.toLocaleTimeString(locale, {
-      hour: 'numeric',
-      minute: 'numeric',
-      second: 'numeric'
-    })
-    let _uptime = process.uptime() * 1000
-    let _muptime
-    if (process.send) {
-      process.send('uptime')
-      _muptime = await new Promise(resolve => {
-        process.once('message', resolve)
-        setTimeout(resolve, 1000)
-      }) * 1000
-    }
-    let muptime = clockString(_muptime)
-    let uptime = clockString(_uptime)
-    let totalreg = Object.keys(global.db.data.users).length
-    let rtotalreg = Object.values(global.db.data.users).filter(user => user.registered == true).length
-    let help = Object.values(global.plugins).filter(plugin => !plugin.disabled).map(plugin => {
-      return {
-        help: Array.isArray(plugin.tags) ? plugin.help : [plugin.help],
-        tags: Array.isArray(plugin.tags) ? plugin.tags : [plugin.tags],
-        prefix: 'customPrefix' in plugin,
-        limit: plugin.limit,
-        premium: plugin.premium,
-        enabled: !plugin.disabled,
-      }
-    })
-    for (let plugin of help)
-      if (plugin && 'tags' in plugin)
-        for (let tag of plugin.tags)
-          if (!(tag in tags) && tag) tags[tag] = tag
-    conn.menu = conn.menu ? conn.menu : {}
-    let before = conn.menu.before || defaultMenu.before
-    let header = conn.menu.header || defaultMenu.header
-    let body = conn.menu.body || defaultMenu.body
-    let footer = conn.menu.footer || defaultMenu.footer
-    let after = conn.menu.after || (conn.user.jid == global.conn.user.jid ? '' : ``) + defaultMenu.after
-    let _text = [
-      before,
-      ...Object.keys(tags).map(tag => {
-        return header.replace(/%category/g, tags[tag]) + '\n' + [
-          ...help.filter(menu => menu.tags && menu.tags.includes(tag) && menu.help).map(menu => {
-            return menu.help.map(help => {
-              return body.replace(/%cmd/g, menu.prefix ? help : '%p' + help)
-                .replace(/%islimit/g, menu.limit ? '◜⭐◞' : '')
-                .replace(/%isPremium/g, menu.premium ? '◜🪪◞' : '')
-                .trim()
-            }).join('\n')
-          }),
-          footer
-        ].join('\n')
-      }),
-      after
-    ].join('\n')
-    let text = typeof conn.menu == 'string' ? conn.menu : typeof conn.menu == 'object' ? _text : ''
-   let replace = {
- "%": "%",
- p: _p,
- uptime,
- muptime,
- me: conn.getName(conn.user.jid),
- npmname: _package.name,
- npmdesc: _package.description,
- version: _package.version,
- exp: exp - min,
- maxexp: xp,
- totalexp: exp,
- xp4levelup: max - exp,
- github: _package.homepage ? _package.homepage.url || _package.homepage : "[unknown github url]",
- mode,
- _p,
- tag,
- name,
- level,
- limit,
- name,
- totalreg,
- readmore: readMore
-   }
-    text = text.replace(new RegExp(`%(${Object.keys(replace).sort((a, b) => b.length - a.length).join`|`})`, 'g'), (_, name) => '' + replace[name])
-
-    let pp = 'https://i.ibb.co/CPVcnqH/file.jpg'
-    let pp2 = 'https://i.ibb.co/9WrytGt/file.jpg'
-    let pp3 = 'https://i.ibb.co/CPVcnqH/file.jpg'
-    let pp4 = 'https://i.ibb.co/9WrytGt/file.jpg'
-    let pp5 = 'https://i.ibb.co/CPVcnqH/file.jpg'
-    let pp6 = 'https://i.ibb.co/9WrytGt/file.jpg'
-    let pp7 = 'https://i.ibb.co/CPVcnqH/file.jpg'
-    let pp8 = 'https://i.ibb.co/9WrytGt/file.jpg'
-    let pp9 = 'https://i.ibb.co/JmcS3kv/Sylph.jpg'
-    let pp10 = 'https://i.ibb.co/CPVcnqH/file.jpg'
-    let pp11 = 'https://i.ibb.co/JmcS3kv/Sylph.jpg'
-    let pp12 = 'https://i.ibb.co/CPVcnqH/file.jpg'
-    let pp13 = 'https://i.ibb.co/Cs6Tt9V/Sylph.jpg'
-    let pp14 = 'https://i.ibb.co/JmcS3kv/Sylph.jpg'
-    let pp15 = 'https://i.ibb.co/Cs6Tt9V/Sylph.jpg'
-    let img = 'https://i.postimg.cc/Vv73j0HY/IMG-6032.jpg'
-    let img2 = 'https://d.uguu.se/iqqLBUfF.jpg'
-    await m.react('⭐')
-   // await conn.sendMessage(m.chat, { video: { url: [pp, pp2, pp3, pp4, pp5, pp6, pp7, pp8, pp9, pp10, pp11, pp12, pp13, pp14, pp15].getRandom() }, gifPlayback: true, caption: text.trim(), mentions: [m.sender] }, { quoted: estilo })
-    await conn.sendFile(m.chat, img, 'thumbnail.jpg', text.trim(), m, null, rcanal)
-   //await conn.sendAi(m.chat, botname, textbot, text.trim(), img, img, canal, estilo)
-
-  } catch (e) {
-    conn.reply(m.chat, '❎ Lo sentimos, el menú tiene un error.', m)
-    throw e
-  }
+await conn.sendFile(m.chat, img, 'img.jpg', texto)
+global.db.data.users[m.sender].lastcofre = new Date * 1
 }
-
-handler.help = ['allmenu']
-handler.tags = ['main']
-handler.command = ['allmenu', 'menucompleto', 'menúcompleto', 'menú', 'menu'] 
-handler.register = true 
+handler.help = ['menu']
+handler.tags = ['main'] 
+handler.command = ['menu'] 
 export default handler
-
-
-const more = String.fromCharCode(8206)
-const readMore = more.repeat(4001)
-
-function clockString(ms) {
-  let h = isNaN(ms) ? '--' : Math.floor(ms / 3600000)
-  let m = isNaN(ms) ? '--' : Math.floor(ms / 60000) % 60
-  let s = isNaN(ms) ? '--' : Math.floor(ms / 1000) % 60
-  return [h, m, s].map(v => v.toString().padStart(2, 0)).join(':')
-}
-
-  var ase = new Date();
-  var hour = ase.getHours();
-switch(hour){
-  case 0: hour = 'una linda noche 🌙'; break;
-  case 1: hour = 'una linda noche 💤'; break;
-  case 2: hour = 'una linda noche 🦉'; break;
-  case 3: hour = 'una linda mañana ✨'; break;
-  case 4: hour = 'una linda mañana 💫'; break;
-  case 5: hour = 'una linda mañana 🌅'; break;
-  case 6: hour = 'una linda mañana 🌄'; break;
-  case 7: hour = 'una linda mañana 🌅'; break;
-  case 8: hour = 'una linda mañana 💫'; break;
-  case 9: hour = 'una linda mañana ✨'; break;
-  case 10: hour = 'un lindo dia 🌞'; break;
-  case 11: hour = 'un lindo dia 🌨'; break;
-  case 12: hour = 'un lindo dia ❄'; break;
-  case 13: hour = 'un lindo dia 🌤'; break;
-  case 14: hour = 'una linda tarde 🌇'; break;
-  case 15: hour = 'una linda tarde 🥀'; break;
-  case 16: hour = 'una linda tarde 🌹'; break;
-  case 17: hour = 'una linda tarde 🌆'; break;
-  case 18: hour = 'una linda noche 🌙'; break;
-  case 19: hour = 'una linda noche 🌃'; break;
-  case 20: hour = 'una linda noche 🌌'; break;
-  case 21: hour = 'una linda noche 🌃'; break;
-  case 22: hour = 'una linda noche 🌙'; break;
-  case 23: hour = 'una linda noche 🌃'; break;
-}
-  var greeting = "espero que tengas " + hour;
