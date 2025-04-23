@@ -1,3 +1,4 @@
+
 {
   "name": "Barboza",
   "version": "2.2.0",
@@ -95,7 +96,7 @@
     "megajs": "^1.2.0",
     "mime-types": "^2.1.37",
     "api-dylux": "^1.7.5",
-    "yargs": "^17.6.0",
+    "yargs": "^17.6.0"
   },
   "optionalDependencies": {
     "wa-sticker-formatter": "^4.4.0",
