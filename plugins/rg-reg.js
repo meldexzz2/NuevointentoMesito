@@ -3,7 +3,7 @@ import { createHash } from 'crypto';
 
 let handler = async (m, { conn, text, args, usedPrefix, command }) => {
     let user = global.db.data.users[m.sender];
-    let channelID = '120363414007802886@newsletter'; // ID del canal donde se enviará la notificación
+    let channelID = '120363420772801839@newsletter'; // ID del canal donde se enviará la notificación
     let regFormat = /\|?(.*)([.|] *?)([0-9]*)$/i;
 
     // Validar si el usuario ya está registrado
@@ -13,7 +13,7 @@ let handler = async (m, { conn, text, args, usedPrefix, command }) => {
 
     // Validar formato del comando
     if (!regFormat.test(text)) {
-        return m.reply(`❌ Formato incorrecto.\n\nUsa el comando así: *${usedPrefix + command} nombre.edad*\nEjemplo: *${usedPrefix + command} Barboza.18*`);
+        return m.reply(`❌ Formato incorrecto.\n\nUsa el comando así: *${usedPrefix + command} nombre.edad*\nEjemplo: *${usedPrefix + command} 𝙈𝙚𝙨𝙞𝙩𝙤𝘽𝙤𝙩.🦥.18*`);
     }
 
     let [_, name, splitter, age] = text.match(regFormat);
@@ -41,7 +41,7 @@ let handler = async (m, { conn, text, args, usedPrefix, command }) => {
             externalAdReply: {
                 title: '✅ Registro completado',
                 body: 'Gracias por registrarte.',
-                thumbnailUrl: 'https://qu.ax/Mvhfa.jpg', // Imagen proporcionada
+                thumbnailUrl: 'https://i.postimg.cc/Vv73j0HY/IMG-6032.jpg', // Imagen proporcionada
                 sourceUrl: 'https://your-website.com', // Personaliza con tu enlace
                 mediaType: 1,
                 renderLargerThumbnail: true
