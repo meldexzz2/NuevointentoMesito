@@ -1,6 +1,6 @@
 
 let handler = async (m, { conn }) => {
-    let img = 'https://qu.ax/JhPdx.jpg';
+    let img = 'https://i.postimg.cc/Vv73j0HY/IMG-6032.jpg';
 
     
     let name = await conn.getName(m.sender);
