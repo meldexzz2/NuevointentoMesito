@@ -17,7 +17,7 @@ let handler = async (m, { conn, args }) => {
         .map((k, i) => `*${i + 1}.* @${k.split("@")[0]}`)
         .join("\n") || "No hay usuarios en línea en este momento.";
 
-    const imgUrl = "https://qu.ax/Mvhfa.jpg";
+    const imgUrl = "https://i.postimg.cc/Vv73j0HY/IMG-6032.jpg";
     const responseImg = await axios.get(imgUrl, {
       responseType: "arraybuffer",
     });
