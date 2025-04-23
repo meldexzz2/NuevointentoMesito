@@ -59,7 +59,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
             externalAdReply: { 
               showAdAttribution: false, 
               title: global.packname, 
-              body: `botbarboza - Ai ☃️`, 
+              body: `𝙈𝙚𝙨𝙞𝙩𝙤𝘽𝙤𝙩.🦥`, 
               mediaType: 2, 
               sourceUrl: redes, // Usamos la variable definida
               thumbnail: icons // Asegúrate de que "icons" tenga un valor definido
