@@ -1,117 +1,110 @@
 
-import fs from 'fs';
-import fetch from 'node-fetch';
+import axios from "axios";
 
-// Mapa para almacenar la sesión de búsqueda de APK
-let apkSession = new Map();
+let handler = async (m, { conn, args }) => {
+  try {
+    // Validación de argumentos
+    if (!args[0]) {
+      return m.reply("❌ Por favor, proporciona el nombre de la aplicación que deseas descargar.\nEjemplo: .apk Whatsapp");
+    }
 
-let handler = async (m, { conn, text, usedPrefix, command }) => {
-  // Rama: Comando inicial .apk con término de búsqueda
-  if (command === 'apk' && text) {
-    const reactionMessage = await conn.sendMessage(
-      m.chat,
-      { text: `🔍 Buscando la aplicación...` },
-      { quoted: m }
-    );
-    await conn.sendMessage(
-      m.chat,
-      { react: { text: '📱', key: reactionMessage.key } },
-      { quoted: m }
-    );
-    try {
-      // Llamada a la API con el término de búsqueda
-      const response = await fetch(`https://delirius-apiofc.vercel.app/download/apk?query=${encodeURIComponent(text)}`);
-      const data = await response.json();
-      if (!data.status || !data.data)
-        throw new Error("No se encontró la aplicación.");
+    const appName = args.join(" "); // Unir argumentos en caso de múltiples palabras
+    m.reply(`🔄 Buscando el APK de *${appName}*, por favor espera...`);
 
-      const app = data.data;
-      // Guardamos la sesión con la info de la app
-      apkSession.set(m.chat, { app });
+    // URLs de las APIs
+    const apiUrls = [
+      `https://api.dorratz.com/v2/apk-dl?text=${encodeURIComponent(appName)}`,
+      `https://delirius-apiofc.vercel.app/download/apk?query=${encodeURIComponent(appName)}`
+    ];
 
-      // Descripción de la aplicación
-      let description = `⌘━─━─≪ *ᑲ᥆ᥣіᥣᥣ᥆ ᑲ᥆𝗍 ᥲі™* ≫─━─━⌘\n`;
-      description += `➷ *Nombre:* ${app.name}\n`;
-      description += `➷ *Desarrollador:* ${app.developer}\n`;
-      description += `➷ *ID:* ${app.id}\n`;
-      description += `➷ *Publicado:* ${app.publish}\n`;
-      description += `➷ *Tamaño:* ${app.size}\n`;
-      description += `➷ *Descargas:* ${app.stats.downloads.toLocaleString()}\n`;
-      description += `➷ *Rating:* ${app.stats.rating.average} (${app.stats.rating.total} valoraciones)\n\n`;
-      description += `_⚠️Estas Seguro De Descargar Esta Aplicación??._`;
+    let apkData = null;
 
-      // Botón para descarga
-      const buttons = [
-        {
-          buttonId: `${usedPrefix}apk_download`,
-          buttonText: { displayText: "📥 Descargar" },
-          type: 1
+    // Iterar sobre cada API hasta encontrar un resultado válido
+    for (const apiUrl of apiUrls) {
+      try {
+        const response = await axios.get(apiUrl);
+        if (response.status === 200 && response.data.status) {
+          apkData = response.data.data;
+          break; // Detener la búsqueda si se encuentra una respuesta válida
         }
-      ];
-
-      // Enviar mensaje con la imagen (icono de la app) y descripción
-      await conn.sendMessage(
-        m.chat,
-        {
-          image: { url: app.image },
-          caption: description,
-          buttons: buttons,
-          viewOnce: true
-        },
-        { quoted: m }
-      );
-    } catch (error) {
-      console.error("❌ Error:", error);
-      await conn.sendMessage(
-        m.chat,
-        { react: { text: '❌', key: reactionMessage.key } },
-        { quoted: m }
-      );
-      await conn.sendMessage(
-        m.chat,
-        { text: `❌ Ocurrió un error: ${error.message || "Error desconocido"}` },
-        { quoted: m }
-      );
+      } catch (error) {
+        console.error(`Error al consultar ${apiUrl}:`, error.message);
+      }
     }
-    return;
-  }
 
-  // Rama: Al pulsar el botón de descarga (.apk_download)
-  if (command === 'apk_download') {
-    let session = apkSession.get(m.chat);
-    if (!session) {
-      return conn.sendMessage(
-        m.chat,
-        { text: `❗ No hay sesión activa. Realiza una búsqueda usando ${usedPrefix}apk <nombre de la aplicación>.` },
-        { quoted: m }
-      );
+    if (!apkData) {
+      return m.reply(`❌ No se encontró la aplicación *${appName}*. Intenta con otro nombre.`);
     }
-    let { app } = session;
-    const downloadUrl = app.download;
-    // Enviar el archivo APK como documento
+
+    // Confirmar detalles de la aplicación
+    let description = `🌐 *Información del APK*:\n`;
+    description += `📌 *Nombre:* ${apkData.name}\n`;
+    description += `🏢 *Desarrollador:* ${apkData.developer || "No especificado"}\n`;
+    description += `📅 *Publicado:* ${apkData.publish || "No disponible"}\n`;
+    description += `🗂️ *Tamaño:* ${apkData.size || "Desconocido"}\n`;
+    description += `📥 *Descargas:* ${apkData.stats?.downloads?.toLocaleString() || "N/A"}\n`;
+    description += `⭐ *Rating:* ${apkData.stats?.rating?.average || "N/A"} (${apkData.stats?.rating?.total || 0} valoraciones)\n\n`;
+    description += `_📲 Presiona el botón abajo para descargar el APK._`;
+
+    // Botón de descarga
+    const buttons = [
+      {
+        buttonId: `${conn.usedPrefix}apk_download`,
+        buttonText: { displayText: "📥 Descargar APK" },
+        type: 1,
+      },
+    ];
+
     await conn.sendMessage(
       m.chat,
       {
-        document: { url: downloadUrl },
-        mimetype: "application/vnd.android.package-archive",
-        fileName: `${app.name}.apk`,
-        caption: `⟡ *${app.name}*\n⟡ APK listo para descargar.\n> Powered by Bolillo™`
+        image: { url: apkData.image },
+        caption: description,
+        buttons: buttons,
+        viewOnce: true,
       },
       { quoted: m }
     );
-    return;
-  }
 
-  // Caso: .apk sin término de búsqueda
-  if (command === 'apk' && !text) {
-    let example = `${usedPrefix}apk WhatsApp`;
-    return conn.sendMessage(
-      m.chat,
-      { text: `❗ Ingresa un término de búsqueda.\n\nEjemplo: ${example}` },
-      { quoted: m }
-    );
+    // Guardar sesión de búsqueda
+    global.apkSession = { apkData };
+
+  } catch (error) {
+    console.error(error);
+    return m.reply("❌ Hubo un error al buscar el APK. Por favor, intenta nuevamente.");
   }
 };
 
-handler.command = /^(apk|apk_download)$/i;
-export default handler;
+// Rama: Descarga del APK
+const handlerDownload = async (m, { conn }) => {
+  try {
+    if (!global.apkSession || !global.apkSession.apkData) {
+      return m.reply(`❗ No hay sesión activa. Primero busca una aplicación con el comando .apk <nombre>.`);
+    }
+
+    const { apkData } = global.apkSession;
+
+    await conn.sendMessage(
+      m.chat,
+      {
+        document: { url: apkData.download },
+        mimetype: "application/vnd.android.package-archive",
+        fileName: `${apkData.name}.apk`,
+        caption: `📦 *${apkData.name}*\n✅ APK listo para descargar.`,
+      },
+      { quoted: m }
+    );
+
+    global.apkSession = null; // Limpiar la sesión después de la descarga
+
+  } catch (error) {
+    console.error(error);
+    m.reply("❌ Hubo un error al descargar el APK.");
+  }
+};
+
+// Registro de comandos
+handler.command = ["apk"];
+handlerDownload.command = ["apk_download"];
+
+export default [handler, handlerDownload];
