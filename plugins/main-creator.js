@@ -8,7 +8,7 @@ async function handler(m, { conn }) {
     let name = await conn.getName(ownerJid) || 'owner'; 
     let about = (await conn.fetchStatus(ownerJid).catch(() => {}))?.status || 'Creador de bots de Whatapp ';
 
-    let empresa = 'Bolillo- Servicios Tecnológicos';
+    let empresa = 'MESITO - Servicios Tecnológicos';
 
     let vcard = `
 BEGIN:VCARD
