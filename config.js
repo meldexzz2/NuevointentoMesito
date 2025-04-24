@@ -12,6 +12,8 @@ global.owner = [
   ['584146277368', 'Barboza OFC',true],
   ['5215649707515', 'meldexzz',true],
   ['5215615180632', 'meldexzz2',true],
+  ['5219981403699', 'mesito',true],
+  ['5219986160826', 'mesitoo',true],
 
 ]
 
