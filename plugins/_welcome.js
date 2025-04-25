@@ -1,50 +1,81 @@
-import {WAMessageStubType} from '@whiskeysockets/baileys'
-import fetch from 'node-fetch'
+import { WAMessageStubType } from '@whiskeysockets/baileys';
+import fs from 'fs';
+import path from 'path';
+import fetch from 'node-fetch';
 
-export async function before(m, {conn, participants, groupMetadata}) {
-  if (!m.messageStubType || !m.isGroup) return !0;
-  let pp = await conn.profilePictureUrl(m.messageStubParameters[0], 'image').catch(_ => 'https://i.postimg.cc/Vv73j0HY/IMG-6032.jpg')
-  let img = await (await fetch(`${pp}`)).buffer()
-  let chat = global.db.data.chats[m.chat]
+async function getUserName(conn, jid) {
+  let name = await conn.getName(jid);
+  if (!name) {
+    const contact = await conn.fetchContact(jid);
+    name = contact?.notify || contact?.name || jid.split('@')[0];
+  }
+  return name;
+}
 
-  if (chat.bienvenida && m.messageStubType == 27) {
-    if (chat.sWelcome) {
-      let user = `@${m.messageStubParameters[0].split`@`[0]}`
-      let welcome = chat.sWelcome
-        .replace('@user', () => user)
-        .replace('@group', () => groupMetadata.subject)
-        .replace('@desc', () => groupMetadata.desc || 'sin descripción');
-      await conn.sendAi(m.chat, botname, textbot, welcome, img, img, canal)
-    } else {
-      let bienvenida = `┌─★ 𝙈𝙚𝙨𝙞𝙩𝙤𝘽𝙤𝙩.🦥 \n│「 _Bienvenido_ 」\n└┬★ 「 @${m.messageStubParameters[0].split`@`[0]} 」\n   │✑  _Bienvenido_ a\n   │✑  ${groupMetadata.subject}\n   │✑  _Descripción_:\n${groupMetadata.desc || '_sin descripción_'}\n   └───────────────┈ ⳹`
-      await conn.sendAi(m.chat, botname, textbot, bienvenida, img, img)
+function getGroupIcon(m) {
+  const dirPath = path.resolve('./groupIcons');
+  const groupIconPath = path.join(dirPath, `${m.chat}.jpg`);
+
+  if (fs.existsSync(groupIconPath)) {
+    return fs.readFileSync(groupIconPath);
+  }
+  return null;
+}
+
+async function getUserProfilePicture(conn, jid) {
+  try {
+    const ppUrl = await conn.profilePictureUrl(jid, 'image');
+    if (ppUrl) {
+      return await (await fetch(ppUrl)).buffer();
     }
+  } catch (e) {}
+  return null;
+}
+
+export async function before(m, { conn, participants, groupMetadata }) {
+  if (!m.messageStubType || !m.isGroup) return true;
+
+  let who = m.messageStubParameters[0];
+  let taguser = `@${who.split('@')[0]}`;
+  let chat = global.db.data.chats[m.chat];
+
+  const userJid = m.messageStubParameters[0];
+  let img = await getUserProfilePicture(conn, userJid);
+
+
+  if (!img) {
+    img = getGroupIcon(m);
+  }
+  if (!img) {
+    img = fs.readFileSync('./default-image.jpg'); 
   }
 
-  if (chat.bienvenida && m.messageStubType == 28) {
-    if (chat.sBye) {
-      let user = `@${m.messageStubParameters[0].split`@`[0]}`
-      let bye = chat.sBye
-        .replace('@user', () => user)
-        .replace('@group', () => groupMetadata.subject)
-        .replace('@desc', () => groupMetadata.desc || 'sin descripción');
-      await conn.sendAi(m.chat, botname, textbot, bye, img, img)
-    } else {
-      let bye = `┌─★ _𝙈𝙚𝙨𝙞𝙩𝙤𝘽𝙤𝙩.🦥 \n│「 _BAYY_ 👋 」\n└┬★ 「 @${m.messageStubParameters[0].split`@`[0]} 」\n   │✑  _Largate_\n   │✑ _Jamás te quisimos aquí_\n   └───────────────┈ ⳹`
-      await conn.sendAi(m.chat, botname, textbot, bye, img, img)
-    }
+
+  let message = '';
+  switch (m.messageStubType) {
+    case WAMessageStubType.GROUP_PARTICIPANT_ADD: 
+      message = chat.sWelcome
+        ? chat.sWelcome.replace('@user', taguser).replace('@subject', groupMetadata.subject)
+        : `_🙂 Hola *${taguser}*, bienvenid@ al grupo *${groupMetadata.subject}*._`;
+      break;
+    case WAMessageStubType.GROUP_PARTICIPANT_REMOVE:
+      message = chat.sBye
+        ? chat.sBye.replace('@user', taguser).replace('@subject', groupMetadata.subject)
+        : `_☠️ *${taguser}* fue expulsad@ del grupo._`;
+      break;
+    case WAMessageStubType.GROUP_PARTICIPANT_LEAVE:
+      message = chat.sBye
+        ? chat.sBye.replace('@user', taguser).replace('@subject', groupMetadata.subject)
+        : `_👋 *${taguser}* ha abandonado el grupo._`;
+      break;
   }
 
-  if (chat.bienvenida && m.messageStubType == 32) {
-    if (chat.sBye) {
-      let user = `@${m.messageStubParameters[0].split`@`[0]}`
-      let bye = chat.sBye
-        .replace('@user', () => user)
-        .replace('@group', () => groupMetadata.subject)
-        .replace('@desc', () => groupMetadata.desc || 'sin descripción');
-      await conn.sendAi(m.chat, botname, textbot, bye, img, img)
-    } else {
-      let kick = `┌─★ 𝙈𝙚𝙨𝙞𝙩𝙤𝘽𝙤𝙩.🦥  \n│「 _BAYY_ 👋 」\n└┬★ 「 @${m.messageStubParameters[0].split`@`[0]} 」\n   │✑  _Largate_\n   │✑ _Jamás te quisimos aquí_\n   └───────────────┈ ⳹`
-      await conn.sendAi(m.chat, botname, textbot, kick, img, img)
-    }
-}}
+
+  if (message) {
+    await conn.sendMessage(m.chat, {
+      image: img,
+      caption: message,
+      mentions: [userJid],
+    });
+  }
+}
